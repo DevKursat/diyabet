@@ -14,7 +14,7 @@ import {
 } from "recharts";
 
 type Kayit = {
-  id: number;
+  id: string;
   ad: string;
   yas: number;
   cinsiyet: string;
@@ -56,26 +56,37 @@ function formatTarih(tarih: string) {
 export default function GecmisSayfasi() {
   const [kayitlar, setKayitlar] = useState<Kayit[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
-  const [silinen, setSilinen] = useState<number | null>(null);
-  const [acikKayit, setAcikKayit] = useState<number | null>(null);
-
-  const veriGetir = async () => {
-    try {
-      const res = await fetch("/api/kayitlar");
-      const data = await res.json();
-      setKayitlar(data.kayitlar || []);
-    } catch {
-      // pass
-    } finally {
-      setYukleniyor(false);
-    }
-  };
+  const [silinen, setSilinen] = useState<string | null>(null);
+  const [acikKayit, setAcikKayit] = useState<string | null>(null);
 
   useEffect(() => {
-    veriGetir();
+    let aktif = true;
+
+    const veriGetir = async () => {
+      try {
+        const res = await fetch("/api/kayitlar");
+        const data = await res.json();
+
+        if (aktif) {
+          setKayitlar(data.kayitlar || []);
+        }
+      } catch {
+        // pass
+      } finally {
+        if (aktif) {
+          setYukleniyor(false);
+        }
+      }
+    };
+
+    void veriGetir();
+
+    return () => {
+      aktif = false;
+    };
   }, []);
 
-  const sil = async (id: number) => {
+  const sil = async (id: string) => {
     setSilinen(id);
     try {
       await fetch(`/api/kayitlar?id=${id}`, { method: "DELETE" });
@@ -130,7 +141,7 @@ export default function GecmisSayfasi() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-3 gap-4 mb-8"
+            className="grid grid-cols-3 gap-5 sm:gap-6 mb-8"
           >
             {[
               { etiket: "Toplam Kayıt", deger: ozet.toplamKayit, ikon: "📋" },
@@ -278,7 +289,7 @@ export default function GecmisSayfasi() {
                       className="overflow-hidden"
                     >
                       <div className="px-5 pb-5 border-t border-white/5 pt-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 mb-4">
                           {[
                             { etiket: "Kan Basıncı", deger: kayit.kan_basinci, birim: "mmHg" },
                             { etiket: "Kan Şekeri", deger: kayit.ac_kan_sekeri, birim: "mg/dL" },

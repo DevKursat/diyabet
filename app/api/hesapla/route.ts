@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { riskHesapla } from "@/lib/riskHesapla";
 import { kaydetSaglikVerisi } from "@/lib/db";
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     const kanBasinci = `${kanBasinciSistolik}/${kanBasinciDiyastolik}`;
 
-    kaydetSaglikVerisi({
+    await kaydetSaglikVerisi({
       ad,
       yas,
       cinsiyet,

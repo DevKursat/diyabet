@@ -1,43 +1,29 @@
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
+import { initializeApp } from "firebase/app";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDocs, 
+  deleteDoc, 
+  doc, 
+  query, 
+  orderBy 
+} from "firebase/firestore/lite";
 
-const DB_PATH = path.join(process.cwd(), "data", "diyabet.db");
+const firebaseConfig = {
+  apiKey: "AIzaSyAxh1FGY2FTsyxoiFpkQhbvzP34ZzJqurM",
+  authDomain: "diyabetsev.firebaseapp.com",
+  projectId: "diyabetsev",
+  storageBucket: "diyabetsev.firebasestorage.app",
+  messagingSenderId: "444857307909",
+  appId: "1:444857307909:web:1c4d60816ee60786c2dd6c"
+};
 
-function getDb() {
-  const dataDir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-
-  const db = new Database(DB_PATH);
-
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS saglik_kayitlari (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      ad TEXT NOT NULL,
-      yas INTEGER NOT NULL,
-      cinsiyet TEXT NOT NULL,
-      kilo REAL NOT NULL,
-      boy REAL NOT NULL,
-      bmi REAL NOT NULL,
-      bel_cevresi REAL NOT NULL,
-      kan_basinci TEXT NOT NULL,
-      ac_kan_sekeri REAL NOT NULL,
-      hba1c REAL NOT NULL,
-      aile_gecmisi TEXT NOT NULL,
-      aktivite TEXT NOT NULL,
-      risk_yuzdesi REAL NOT NULL,
-      risk_seviyesi TEXT NOT NULL,
-      olusturma DATETIME DEFAULT (datetime('now', 'localtime'))
-    )
-  `);
-
-  return db;
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export type SaglikKaydi = {
-  id: number;
+  id: string;
   ad: string;
   yas: number;
   cinsiyet: string;
@@ -55,25 +41,28 @@ export type SaglikKaydi = {
   olusturma: string;
 };
 
-export function kaydetSaglikVerisi(veri: Omit<SaglikKaydi, "id" | "olusturma">) {
-  const db = getDb();
-  const stmt = db.prepare(`
-    INSERT INTO saglik_kayitlari
-      (ad, yas, cinsiyet, kilo, boy, bmi, bel_cevresi, kan_basinci, ac_kan_sekeri, hba1c, aile_gecmisi, aktivite, risk_yuzdesi, risk_seviyesi)
-    VALUES
-      (@ad, @yas, @cinsiyet, @kilo, @boy, @bmi, @bel_cevresi, @kan_basinci, @ac_kan_sekeri, @hba1c, @aile_gecmisi, @aktivite, @risk_yuzdesi, @risk_seviyesi)
-  `);
-
-  const result = stmt.run(veri);
-  return result.lastInsertRowid;
+export async function kaydetSaglikVerisi(veri: Omit<SaglikKaydi, "id" | "olusturma">) {
+  const kayitlarRef = collection(db, "saglik_kayitlari");
+  const docRef = await addDoc(kayitlarRef, {
+    ...veri,
+    olusturma: new Date().toISOString()
+  });
+  return docRef.id;
 }
 
-export function tumKayitlariGetir(): SaglikKaydi[] {
-  const db = getDb();
-  return db.prepare("SELECT * FROM saglik_kayitlari ORDER BY olusturma DESC").all() as SaglikKaydi[];
+export async function tumKayitlariGetir(): Promise<SaglikKaydi[]> {
+  const kayitlarRef = collection(db, "saglik_kayitlari");
+  const q = query(kayitlarRef, orderBy("olusturma", "desc"));
+  const querySnapshot = await getDocs(q);
+  
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as SaglikKaydi[];
 }
 
-export function kayitSil(id: number) {
-  const db = getDb();
-  return db.prepare("DELETE FROM saglik_kayitlari WHERE id = ?").run(id);
+export async function kayitSil(id: string) {
+  const docRef = doc(db, "saglik_kayitlari", id);
+  await deleteDoc(docRef);
+  return id;
 }

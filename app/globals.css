@@ -6,18 +6,13 @@
   --bg-end: #24243e;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
   background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+  background-attachment: fixed;
   min-height: 100vh;
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
   color: #f1f5f9;

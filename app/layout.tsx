@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className="h-full">
-      <body className="min-h-full antialiased">
+    <html lang="tr" className="h-full" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <body className="min-h-full antialiased" suppressHydrationWarning>
         <div className="blob blob-1" />
         <div className="blob blob-2" />
         <div className="blob blob-3" />

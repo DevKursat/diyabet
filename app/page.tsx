@@ -583,7 +583,7 @@ function AdimKanDegerleri({ form, guncelle }: { form: FormData; guncelle: (alan:
         onChange={(v) => guncelle("hba1c", v)}
       />
 
-      <div className="grid grid-cols-3 gap-2 text-xs text-center">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 text-xs text-center">
         {[
           { etiket: "Normal", aralik: "< 5.7%", renk: "#10b981" },
           { etiket: "Prediyabet", aralik: "5.7–6.4%", renk: "#f59e0b" },
@@ -626,7 +626,7 @@ function AdimYasamTarzi({ form, guncelle }: { form: FormData; guncelle: (alan: k
 
       <div>
         <FormLabel>Ailede Diyabet Geçmişi</FormLabel>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {aileSecenekleri.map((opt) => (
             <button
               key={opt.deger}

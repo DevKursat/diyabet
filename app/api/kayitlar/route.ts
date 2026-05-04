@@ -1,9 +1,10 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { tumKayitlariGetir, kayitSil } from "@/lib/db";
 
 export async function GET() {
   try {
-    const kayitlar = tumKayitlariGetir();
+    const kayitlar = await tumKayitlariGetir();
     return NextResponse.json({ kayitlar });
   } catch (err) {
     console.error(err);
@@ -17,7 +18,7 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID gerekli." }, { status: 400 });
 
-    kayitSil(Number(id));
+    await kayitSil(id);
     return NextResponse.json({ basarili: true });
   } catch (err) {
     console.error(err);
